@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, LogIn, UserPlus } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "react-hot-toast";
 // Assume signin action exists
@@ -20,24 +20,24 @@ const SignInPage = () => {
         {/* Toggle Buttons */}
         <div className="flex mb-6 bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
           <button
-            onClick={() => router.push('/signup')}
-            className={`flex-1 py-3 px-4 text-center font-medium transition-all duration-300 ease-in-out cursor-pointer ${
-              isSignup
-                ? "bg-red-500 text-white shadow-md"
-                : "text-gray-600 hover:bg-gray-50 hover:text-gray-800"
-            }`}
+            onClick={() => setIsSignup(false)}
+            className={`flex-1 py-3 px-4 text-center font-medium transition-all duration-300 ease-in-out cursor-pointer ${!isSignup
+              ? "bg-red-500 text-white shadow-md"
+              : "text-gray-600 hover:bg-gray-50 hover:text-gray-800"
+              }`}
           >
-            Sign Up
+            <LogIn className="mr-2 inline h-4 w-4" />
+            Sign In
           </button>
           <button
-            onClick={() => setIsSignup(false)}
-            className={`flex-1 py-3 px-4 text-center font-medium transition-all duration-300 ease-in-out cursor-pointer ${
-              !isSignup
-                ? "bg-red-500 text-white shadow-md"
-                : "text-gray-600 hover:bg-gray-50 hover:text-gray-800"
-            }`}
+            onClick={() => router.push('/signup')}
+            className={`flex-1 py-3 px-4 text-center font-medium transition-all duration-300 ease-in-out cursor-pointer ${isSignup
+              ? "bg-red-500 text-white shadow-md"
+              : "text-gray-600 hover:bg-gray-50 hover:text-gray-800"
+              }`}
           >
-            Sign In
+            <UserPlus className="mr-2 inline h-4 w-4" />
+            Sign Up
           </button>
         </div>
 
@@ -111,9 +111,9 @@ const SigninForm = () => {
 
       {/* Divider */}
       <div className="flex items-center my-6">
-        <div className="flex-grow border-t"></div>
+        <div className="flex-grow border-t text-gray-400"></div>
         <span className="mx-3 text-xs text-gray-400 uppercase">Or continue with</span>
-        <div className="flex-grow border-t"></div>
+        <div className="flex-grow border-t text-gray-400"></div>
       </div>
 
       {/* Google */}
