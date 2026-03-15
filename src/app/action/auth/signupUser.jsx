@@ -15,7 +15,13 @@ export const signupUser = async (playload) => {
 
     if (!user) {
         const hashedPassword = await bcrypt.hash(password, 10);
-        playload.password=hashedPassword;
+        playload.password = hashedPassword;
+
+        // Add role, createdAt, and updatedAt fields
+        playload.role = "user";
+        playload.createdAt = new Date();
+        playload.updatedAt = new Date();
+
         const result = await userCollection.insertOne(playload);
 
         result.insertedId = result.insertedId.toString();
