@@ -44,9 +44,9 @@ export const authOptions = {
 
         const dbUser = await getUserByEmail(profile.email);
 
-        // ❌ If user NOT in database → redirect to signup
+        // If user NOT in database → send them to signup with Google prefill
         if (!dbUser) {
-          return "/signup?error=not_registered";
+          return "/signup?social=google";
         }
 
         // ✅ If user exists → allow login

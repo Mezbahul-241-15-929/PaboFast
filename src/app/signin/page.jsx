@@ -79,7 +79,6 @@ const SigninForm = () => {
   useEffect(() => {
     if (status === "authenticated") {
       router.push("/");
-      toast("Successfully Logged In");
     }
   }, [status, router]);
 
