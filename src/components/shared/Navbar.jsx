@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
+import { AiOutlineHeart, AiOutlineBell, AiOutlineShoppingCart } from 'react-icons/ai';
 import {
   FiMenu,
   FiX,
@@ -13,6 +14,7 @@ import {
   FiLogOut,
 } from "react-icons/fi";
 import { AiOutlineUser } from "react-icons/ai";
+import SearchBar from "./SearchBar";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -25,16 +27,17 @@ const Navbar = () => {
   };
 
   const getLinkClass = (path) =>
-    `flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-300 ${
-      pathname === path
-        ? "bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg"
-        : "text-gray-700 hover:bg-gray-100"
+    `flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-300 ${pathname === path
+      ? "bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg"
+      : "text-gray-700 hover:bg-gray-100"
     }`;
 
   const signInBtnClass =
     "px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg hover:shadow-lg transition-all duration-300 flex items-center gap-2";
+  const iconBtnClass =
+    "h-10 w-10 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all duration-300 inline-flex items-center justify-center";
 
-  const links = (
+  const mobileLinks = (
     <>
       <Link
         href="/"
@@ -42,6 +45,27 @@ const Navbar = () => {
         className={getLinkClass("/")}
       >
         <FiHome size={18} /> Home
+      </Link>
+      <Link
+        href="/cart"
+        onClick={() => setIsMenuOpen(false)}
+        className={getLinkClass("/cart")}
+      >
+        <AiOutlineShoppingCart size={18} /> Cart
+      </Link>
+      <Link
+        href="/notifications"
+        onClick={() => setIsMenuOpen(false)}
+        className={getLinkClass("/notifications")}
+      >
+        <AiOutlineBell size={18} /> Notifications
+      </Link>
+      <Link
+        href="/wishlist"
+        onClick={() => setIsMenuOpen(false)}
+        className={getLinkClass("/wishlist")}
+      >
+        <AiOutlineHeart size={18} /> Wishlist
       </Link>
     </>
   );
@@ -57,12 +81,39 @@ const Navbar = () => {
             </Link>
           </div>
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-2">{links}</div>
+          {/* Desktop Center: Search + Home */}
+          <div className="hidden md:flex items-center gap-3 flex-1 justify-center px-4">
+            <div className="w-full max-w-xl">
+              <SearchBar />
+            </div>
+            <Link href="/" className={getLinkClass("/")}>
+              <FiHome size={18} /> Home
+            </Link>
+          </div>
 
-          {/* Right Side (Authenticated / Guest) */}
-          {status === "authenticated" ? (
-            <div className="hidden md:flex items-center gap-4">
+
+          {/* Right Side (Desktop Icons + Auth) */}
+          <div className="hidden md:flex items-center gap-3">
+            <Link href="/notifications">
+              <button className={iconBtnClass + " cursor-pointer relative"}>
+                <AiOutlineBell size={18} />
+                <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
+              </button>
+            </Link>
+            <Link href="/wishlist">
+              <button className={iconBtnClass + " cursor-pointer"}>
+                <AiOutlineHeart size={18} />
+              </button>
+            </Link>
+            <Link href="/cart">
+              <button className={iconBtnClass + " cursor-pointer relative"}>
+                <AiOutlineShoppingCart size={18} />
+                <span className="absolute -top-1 -right-1 bg-blue-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+                  3
+                </span>
+              </button>
+            </Link>
+            {status === "authenticated" ? (
               <div className="dropdown dropdown-end">
                 {/* Desktop Trigger: Profile Image */}
                 <label
@@ -140,17 +191,17 @@ const Navbar = () => {
                   </ul>
                 </div>
               </div>
-            </div>
-          ) : (
-            <Link href="/signin">
-              <button className={signInBtnClass + " hidden md:flex"}>
-                <AiOutlineUser size={18} /> Sign In
-              </button>
-            </Link>
-          )}
+            ) : (
+              <Link href="/signin">
+                <button className={iconBtnClass + " cursor-pointer"}>
+                  <AiOutlineUser size={18} />
+                </button>
+              </Link>
+            )}
+          </div>
 
-          {/* Mobile Menu Button */}
-          <div className="md:hidden">
+          {/* Mobile Right Icons */}
+          <div className="md:hidden flex items-center gap-2">
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className="p-2 rounded-md hover:bg-gray-100"
@@ -159,6 +210,21 @@ const Navbar = () => {
             </button>
           </div>
         </div>
+      </div>
+
+      {/* Mobile Search Bar (under top row) */}
+      <div className="md:hidden px-4 pb-3 flex items-center gap-3">
+        <div className="flex-1">
+          <SearchBar />
+        </div>
+        <Link href="/cart">
+          <button className="h-10 w-10 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all duration-300 inline-flex items-center justify-center relative">
+            <AiOutlineShoppingCart size={20} />
+            <span className="absolute -top-1 -right-1 bg-blue-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+              3
+            </span>
+          </button>
+        </Link>
       </div>
 
       {/* Mobile Menu (UNCHANGED) */}
@@ -198,7 +264,7 @@ const Navbar = () => {
                 <FiX size={20} />
               </button>
             </div>
-            <div className="mt-4 grid gap-2">{links}</div>
+            <div className="mt-4 grid gap-2">{mobileLinks}</div>
             <div className="mt-4 border-t pt-4 flex flex-col gap-2">
               {status === "authenticated" ? (
                 <>
