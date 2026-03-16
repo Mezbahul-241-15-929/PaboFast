@@ -17,9 +17,8 @@ export const signupUser = async (playload) => {
         const hashedPassword = await bcrypt.hash(password, 10);
         playload.password = hashedPassword;
 
-        // Add role, verified flag, createdAt, and updatedAt fields
+        // Add role, createdAt, and updatedAt fields
         playload.role = "user";
-        playload.verified = false; // user is not verified by default
         playload.createdAt = new Date();
         playload.updatedAt = new Date();
 

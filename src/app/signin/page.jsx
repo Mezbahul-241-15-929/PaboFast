@@ -1,11 +1,12 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Eye, EyeOff, LogIn, UserPlus } from "lucide-react";
 import { useForm } from "react-hook-form";
+import { signIn, useSession } from "next-auth/react";
 import { toast } from "react-hot-toast";
 // Assume signin action exists
 // import { signinUser } from "@/app/action/auth/signinUser";
@@ -49,14 +50,38 @@ const SignInPage = () => {
 };
 
 const SigninForm = () => {
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
+  const { data: session, status } = useSession();
   const { register, handleSubmit, reset } = useForm();
 
   const onSubmit = async (data) => {
-    // Placeholder for signin logic
-    toast.success("Signin successful 🎉");
-    reset();
+    const response = await signIn("credentials", {
+      redirect: false,
+      email: data.email,
+      password: data.password,
+    });
+
+    if (response?.ok) {
+      toast.success("Signin successful 🎉");
+      reset();
+      router.push("/");
+      return;
+    }
+
+    toast.error(response?.error || "Authentication failed");
   };
+
+  const handleSocialLogin = async (providerName) => {
+    await signIn(providerName);
+  };
+
+  useEffect(() => {
+    if (status === "authenticated") {
+      router.push("/");
+      toast("Successfully Logged In");
+    }
+  }, [status, router]);
 
   return (
     <div className="bg-white border border-gray-200 rounded-lg p-6 sm:p-8 shadow-sm">
@@ -117,9 +142,9 @@ const SigninForm = () => {
       </div>
 
       {/* Google */}
-      <button className="w-full border border-gray-300 rounded-md py-2 flex items-center justify-center gap-2 hover:border-red-400 hover:bg-gray-50 cursor-pointer transition">
-        <Image src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" width={16} height={16} />
-        Google
+      <button onClick={() => handleSocialLogin("google")} className="btn bg-white text-black border-[#e5e5e5] w-full">
+        <svg aria-label="Google logo" width="16" height="16" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><g><path d="m0 0H512V512H0" fill="#fff"></path><path fill="#34a853" d="M153 292c30 82 118 95 171 60h62v48A192 192 0 0190 341"></path><path fill="#4285f4" d="m386 400a140 175 0 0053-179H260v74h102q-7 37-38 57"></path><path fill="#fbbc02" d="m90 341a208 200 0 010-171l63 49q-12 37 0 73"></path><path fill="#ea4335" d="m153 219c22-69 116-109 179-50l55-54c-78-75-230-72-297 55"></path></g></svg>
+        Login with Google
       </button>
 
       <p className="text-center text-sm text-gray-500 mt-6">

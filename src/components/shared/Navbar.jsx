@@ -2,9 +2,19 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { signOut, useSession } from "next-auth/react";
 import React from "react";
 
 const Navbar = () => {
+  const router = useRouter();
+  const { data: session, status } = useSession();
+
+  const handleLogout = async () => {
+    await signOut({ redirect: false });
+    router.push("/");
+  };
+
   return (
     <div className="bg-base-100 border-b">
       <div className="navbar container mx-auto">
@@ -42,12 +52,21 @@ const Navbar = () => {
           <Link href="/appointment" className="btn btn-outline btn-primary">
             Appointment
           </Link>
-          <Link href="/login" className="btn btn-primary">
-            Login
-          </Link>
-          <Link href="/signup" className="btn btn-primary">
-            Sign Up
-          </Link>
+
+          {status === "authenticated" ? (
+            <button onClick={handleLogout} className="btn btn-secondary">
+              Logout
+            </button>
+          ) : (
+            <>
+              <Link href="/signin" className="btn btn-primary">
+                Login
+              </Link>
+              <Link href="/signup" className="btn btn-primary">
+                Sign Up
+              </Link>
+            </>
+          )}
         </div>
 
       </div>
