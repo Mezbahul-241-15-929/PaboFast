@@ -5,7 +5,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 
 const getUserByEmail = async (email) => {
-  const userCollection = dbConnect(colletionNameObj.userColletion);
+  const userCollection = await dbConnect(colletionNameObj.userColletion);
   return userCollection.findOne({ email });
 };
 

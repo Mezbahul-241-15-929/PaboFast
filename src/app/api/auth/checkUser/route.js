@@ -11,7 +11,7 @@ export async function GET(request) {
     });
   }
 
-  const userCollection = dbConnect(colletionNameObj.userColletion);
+  const userCollection = await dbConnect(colletionNameObj.userColletion);
   const user = await userCollection.findOne({ email });
 
   return new Response(JSON.stringify({ exists: !!user }), {

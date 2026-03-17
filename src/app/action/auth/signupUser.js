@@ -4,7 +4,7 @@ import bcrypt from "bcrypt";
 import dbConnect, { colletionNameObj } from "@/lib/dbConnect";
 
 export const signupUser = async (playload) => {
-    const userCollection = dbConnect(colletionNameObj.userColletion);
+    const userCollection = await dbConnect(colletionNameObj.userColletion);
     const { email, password } = playload;
 
     if (!email || !password) {

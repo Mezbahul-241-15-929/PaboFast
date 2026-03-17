@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { RefreshCw } from "lucide-react";
 
 const ProductPage = () => {
   const [products, setProducts] = useState([]);
@@ -135,20 +136,27 @@ const ProductPage = () => {
 
   return (
     <div>
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Product</h1>
-          <p className="mt-2 text-gray-600">
-            Manage your products here.
-          </p>
+      <div className="rounded-3xl bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 px-6 py-8 text-white shadow-xl">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-semibold">Products</h1>
+            <p className="mt-2 text-sm text-slate-200">
+              Manage your products here.
+            </p>
+          </div>
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={loadProducts}
+              className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1.5 text-xs font-semibold text-white hover:bg-white/20"
+            >
+              <RefreshCw
+                className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`}
+              />
+              Refresh
+            </button>
+          </div>
         </div>
-        <button
-          type="button"
-          onClick={loadProducts}
-          className="rounded-lg border border-gray-200 px-4 py-2 text-sm text-gray-600 hover:bg-gray-50"
-        >
-          Refresh
-        </button>
       </div>
 
       <div className="mt-6 rounded-2xl border border-gray-100 bg-white shadow-lg">
