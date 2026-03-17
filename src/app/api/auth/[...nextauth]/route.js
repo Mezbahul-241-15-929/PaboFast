@@ -61,7 +61,12 @@ export const authOptions = {
                 token.provider = account.provider;
             }
 
-            if (user) {
+            if (account?.provider === "google") {
+                const dbUser = await getUserByEmail(user?.email || token?.email);
+                if (dbUser) {
+                    token.user = dbUser;
+                }
+            } else if (user) {
                 token.user = user;
             }
 

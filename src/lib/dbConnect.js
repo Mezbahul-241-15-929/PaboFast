@@ -3,23 +3,42 @@ import { MongoClient, ServerApiVersion } from "mongodb";
 export const colletionNameObj={
     servicescoll: "services",
     userColletion: "users",
+    categoryCollection: "categories",
+    productCollection: "products",
 }
 
 const uri = process.env.MONGODB_URI;
+const dbName = process.env.DB_NAME;
 
-function dbConnect(collectionName) {
+if (!global._mongoClientPromise) {
+  global._mongoClientPromise = null;
+}
 
+async function getClient() {
+  if (!uri) {
+    throw new Error("MONGODB_URI is not set");
+  }
+
+  if (!global._mongoClientPromise) {
     const client = new MongoClient(uri, {
-        serverApi: {
-            version: ServerApiVersion.v1,
-            strict: true,
-            deprecationErrors: true,
-        }
+      serverApi: {
+        version: ServerApiVersion.v1,
+        strict: true,
+        deprecationErrors: true,
+      },
     });
+    global._mongoClientPromise = client.connect();
+  }
 
-    return client
-        .db(process.env.DB_NAME)
-        .collection(collectionName);
+  return global._mongoClientPromise;
+}
+
+async function dbConnect(collectionName) {
+  if (!dbName) {
+    throw new Error("DB_NAME is not set");
+  }
+  const client = await getClient();
+  return client.db(dbName).collection(collectionName);
 }
 
 export default dbConnect;

@@ -21,9 +21,15 @@ const Navbar = () => {
   const pathname = usePathname();
   const { data: session, status } = useSession();
   const user = session?.user;
+  const isAdmin = user?.dbUser?.role === "admin";
 
   const handleSignOut = async () => {
     await signOut({ callbackUrl: "/" });
+  };
+  const handleDesktopDropdownClose = () => {
+    if (typeof document !== "undefined" && document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
   };
 
   const getLinkClass = (path) =>
@@ -167,15 +173,31 @@ const Navbar = () => {
                     <li>
                       <Link
                         href="/profile"
-                        className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 text-gray-700 font-medium transition-colors"
+                        onClick={() => setIsMenuOpen(false)}
+                        className={getLinkClass("/profile")}
+                        onClickCapture={handleDesktopDropdownClose}
                       >
                         <FiUser className="text-gray-400" /> Profile
                       </Link>
                     </li>
+                    {isAdmin && (
+                      <li>
+                        <Link
+                          href="/dashboard"
+                          onClick={() => setIsMenuOpen(false)}
+                          className={getLinkClass("/dashboard")}
+                          onClickCapture={handleDesktopDropdownClose}
+                        >
+                          <FiHome className="text-gray-400" /> Dashboard
+                        </Link>
+                      </li>
+                    )}
                     <li>
                       <Link
                         href="/settings"
-                        className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 text-gray-700 font-medium transition-colors"
+                        onClick={() => setIsMenuOpen(false)}
+                        className={getLinkClass("/settings")}
+                        onClickCapture={handleDesktopDropdownClose}
                       >
                         <FiSettings className="text-gray-400" /> Settings
                       </Link>
@@ -270,15 +292,26 @@ const Navbar = () => {
                 <>
                   <Link
                     href="/profile"
-                    className="w-full px-4 py-2 rounded-lg hover:bg-gray-50"
+                    onClick={() => setIsMenuOpen(false)}
+                    className={getLinkClass("/profile")}
                   >
-                    Profile
+                    <FiUser size={18} /> Profile
                   </Link>
+                  {isAdmin && (
+                    <Link
+                      href="/dashboard"
+                      onClick={() => setIsMenuOpen(false)}
+                      className={getLinkClass("/dashboard")}
+                    >
+                      <FiHome size={18} /> Dashboard
+                    </Link>
+                  )}
                   <Link
                     href="/settings"
-                    className="w-full px-4 py-2 rounded-lg hover:bg-gray-50"
+                    onClick={() => setIsMenuOpen(false)}
+                    className={getLinkClass("/settings")}
                   >
-                    Settings
+                    <FiSettings size={18} /> Settings
                   </Link>
                   <button
                     onClick={handleSignOut}
@@ -288,7 +321,7 @@ const Navbar = () => {
                   </button>
                 </>
               ) : (
-                <Link href="/signin">
+                <Link href="/signin" onClick={() => setIsMenuOpen(false)}>
                   <button className="cursor-pointer w-full px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg">
                     <AiOutlineUser
                       size={18}
