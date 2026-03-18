@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import { AiOutlineHeart, AiOutlineBell, AiOutlineShoppingCart } from 'react-icons/ai';
@@ -18,6 +18,7 @@ import SearchBar from "./SearchBar";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [cartCount, setCartCount] = useState(0);
   const pathname = usePathname();
   const { data: session, status } = useSession();
   const user = session?.user;
@@ -31,6 +32,46 @@ const Navbar = () => {
       document.activeElement.blur();
     }
   };
+
+  useEffect(() => {
+    const loadCartCount = async () => {
+      try {
+        const sessionUser = session?.user?.dbUser || session?.user;
+        const email = sessionUser?.email;
+        const user_id = sessionUser?._id || sessionUser?.id;
+        if (!email && !user_id) {
+          setCartCount(0);
+          return;
+        }
+
+        const params = new URLSearchParams();
+        if (email) params.set("email", email);
+        if (user_id) params.set("user_id", user_id);
+
+        const res = await fetch(`/api/cart?${params.toString()}`);
+        if (!res.ok) {
+          setCartCount(0);
+          return;
+        }
+        const data = await res.json();
+        const count = Array.isArray(data?.items) ? data.items.length : 0;
+        setCartCount(count);
+      } catch (err) {
+        setCartCount(0);
+      }
+    };
+
+    loadCartCount();
+    const handleCartUpdate = () => loadCartCount();
+    if (typeof window !== "undefined") {
+      window.addEventListener("cart:updated", handleCartUpdate);
+    }
+    return () => {
+      if (typeof window !== "undefined") {
+        window.removeEventListener("cart:updated", handleCartUpdate);
+      }
+    };
+  }, [session?.user]);
 
   const getLinkClass = (path) =>
     `flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-300 ${pathname === path
@@ -51,6 +92,13 @@ const Navbar = () => {
         className={getLinkClass("/")}
       >
         <FiHome size={18} /> Home
+      </Link>
+      <Link
+        href="/shop"
+        onClick={() => setIsMenuOpen(false)}
+        className={getLinkClass("/shop")}
+      >
+        <AiOutlineShoppingCart size={18} /> Shop
       </Link>
       <Link
         href="/cart"
@@ -92,8 +140,11 @@ const Navbar = () => {
             <div className="w-full max-w-xl">
               <SearchBar />
             </div>
-            <Link href="/" className={getLinkClass("/")}>
+            <Link href="/" className={`${getLinkClass("/")} bg-gray-100 hover:bg-gray-200`}>
               <FiHome size={18} /> Home
+            </Link>
+            <Link href="/shop" className={`${getLinkClass("/shop")} bg-gray-100 hover:bg-gray-200`}>
+              <AiOutlineShoppingCart size={18} /> Shop
             </Link>
           </div>
 
@@ -101,22 +152,42 @@ const Navbar = () => {
           {/* Right Side (Desktop Icons + Auth) */}
           <div className="hidden md:flex items-center gap-3">
             <Link href="/notifications">
-              <button className={iconBtnClass + " cursor-pointer relative"}>
+              <button
+                className={
+                  (pathname === "/notifications"
+                    ? "h-10 w-10 rounded-lg inline-flex items-center justify-center bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg"
+                    : iconBtnClass) + " cursor-pointer relative"
+                }
+              >
                 <AiOutlineBell size={18} />
                 <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
               </button>
             </Link>
             <Link href="/wishlist">
-              <button className={iconBtnClass + " cursor-pointer"}>
+              <button
+                className={
+                  (pathname === "/wishlist"
+                    ? "h-10 w-10 rounded-lg inline-flex items-center justify-center bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg"
+                    : iconBtnClass) + " cursor-pointer"
+                }
+              >
                 <AiOutlineHeart size={18} />
               </button>
             </Link>
             <Link href="/cart">
-              <button className={iconBtnClass + " cursor-pointer relative"}>
+              <button
+                className={
+                  (pathname === "/cart"
+                    ? "h-10 w-10 rounded-lg inline-flex items-center justify-center bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg"
+                    : iconBtnClass) + " cursor-pointer relative"
+                }
+              >
                 <AiOutlineShoppingCart size={18} />
-                <span className="absolute -top-1 -right-1 bg-blue-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
-                  3
-                </span>
+                {cartCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-blue-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+                    {cartCount}
+                  </span>
+                )}
               </button>
             </Link>
             {status === "authenticated" ? (
@@ -240,11 +311,20 @@ const Navbar = () => {
           <SearchBar />
         </div>
         <Link href="/cart">
-          <button className="h-10 w-10 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all duration-300 inline-flex items-center justify-center relative">
+          <button
+            className={
+              (pathname === "/cart"
+                ? "h-10 w-10 rounded-lg inline-flex items-center justify-center bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg"
+                : "h-10 w-10 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all duration-300 inline-flex items-center justify-center") +
+              " relative cursor-pointer"
+            }
+          >
             <AiOutlineShoppingCart size={20} />
-            <span className="absolute -top-1 -right-1 bg-blue-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
-              3
-            </span>
+            {cartCount > 0 && (
+              <span className="absolute -top-1 -right-1 bg-blue-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+                {cartCount}
+              </span>
+            )}
           </button>
         </Link>
       </div>

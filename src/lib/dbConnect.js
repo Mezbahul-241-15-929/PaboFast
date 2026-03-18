@@ -5,6 +5,7 @@ export const colletionNameObj={
     userColletion: "users",
     categoryCollection: "categories",
     productCollection: "products",
+    cartCollection: "carts",
 }
 
 const uri = process.env.MONGODB_URI;
