@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -84,7 +84,7 @@ const SignupForm = () => {
 
         if (result?.insertedId) {
 
-            toast.success("Signup successful 🎉");
+            toast.success("Signup successful");
 
             const signInResult = await signIn("credentials", {
                 redirect: false,
@@ -165,7 +165,7 @@ const SignupForm = () => {
 
                         <input
                             type={showPassword ? "text" : "password"}
-                            placeholder="••••••••"
+                            placeholder="********"
                             className="w-full border border-gray-300 rounded-md px-3 py-2 pr-10 hover:border-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-400 outline-none transition"
                             {...register("password", { required: true })}
                         />

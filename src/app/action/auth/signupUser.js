@@ -19,6 +19,7 @@ export const signupUser = async (playload) => {
 
         // Add role, createdAt, and updatedAt fields
         playload.role = "user";
+        playload.emailVerified = null;
         playload.createdAt = new Date();
         playload.updatedAt = new Date();
 
