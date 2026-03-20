@@ -1,4 +1,4 @@
-﻿import { loginUser } from "@/app/action/auth/loginUser";
+import { loginUser } from "@/app/action/auth/loginUser";
 import dbConnect, { colletionNameObj } from "@/lib/dbConnect";
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
@@ -35,25 +35,22 @@ export const authOptions = {
   },
 
   callbacks: {
+
+    // 🔥 THIS IS THE IMPORTANT FIX
     async signIn({ user, account, profile }) {
+
       // If Google login
       if (account?.provider === "google") {
+
         const dbUser = await getUserByEmail(profile.email);
 
-        // If user NOT in database -> send them to signup with Google prefill
+        // If user NOT in database → send them to signup with Google prefill
         if (!dbUser) {
           return "/signup?social=google";
         }
 
-        // If user exists -> allow login
+        // ✅ If user exists → allow login
         return true;
-      }
-
-      // Block unverified credentials users
-      if (account?.provider === "credentials") {
-        if (!user?.verified) {
-          return false;
-        }
       }
 
       return true;

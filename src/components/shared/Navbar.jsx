@@ -23,6 +23,9 @@ const Navbar = () => {
   const { data: session, status } = useSession();
   const user = session?.user;
   const isAdmin = user?.dbUser?.role === "admin";
+  const isVerified = user?.dbUser?.emailVerified === true;
+
+
 
   const handleSignOut = async () => {
     await signOut({ callbackUrl: "/" });
@@ -241,6 +244,16 @@ const Navbar = () => {
                   <div className="border-t border-gray-100 my-2"></div>
 
                   <ul className="space-y-1">
+                    {!isVerified ? (
+                      <li>
+                        <h2 className="getLinkClass">
+                          Account not verified
+                        </h2>
+                      </li>
+                    ) : (
+                      <>
+                      </>
+                    )}
                     <li>
                       <Link
                         href="/profile"
@@ -286,13 +299,7 @@ const Navbar = () => {
               </div>
             ) : (
               <Link href="/signin">
-                <button
-                  className={
-                    (pathname === "/signin" || pathname === "/signup"
-                      ? "h-10 w-10 rounded-lg inline-flex items-center justify-center bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg"
-                      : iconBtnClass) + " cursor-pointer"
-                  }
-                >
+                <button className={iconBtnClass + " cursor-pointer"}>
                   <AiOutlineUser size={18} />
                 </button>
               </Link>

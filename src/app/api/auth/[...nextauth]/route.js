@@ -1,88 +1,85 @@
-﻿import { loginUser } from "@/app/action/auth/loginUser";
+import { loginUser } from "@/app/action/auth/loginUser";
 import dbConnect, { colletionNameObj } from "@/lib/dbConnect";
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 
 const getUserByEmail = async (email) => {
-  const userCollection = await dbConnect(colletionNameObj.userColletion);
-  return userCollection.findOne({ email });
+    const userCollection = await dbConnect(colletionNameObj.userColletion);
+    return userCollection.findOne({ email });
 };
 
 export const authOptions = {
-  providers: [
-    CredentialsProvider({
-      name: "Credentials",
-      credentials: {
-        email: { label: "Email", type: "text" },
-        password: { label: "Password", type: "password" }
-      },
-      async authorize(credentials) {
-        const user = await loginUser(credentials);
-        if (!user) return null;
-        return user;
-      }
-    }),
+    providers: [
+        CredentialsProvider({
+            name: "Credentials",
+            credentials: {
+                email: { label: "Email", type: "text" },
+                password: { label: "Password", type: "password" }
+            },
+            async authorize(credentials) {
+                const user = await loginUser(credentials);
+                if (!user) return null;
+                return user;
+            }
+        }),
 
-    GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    }),
-  ],
+        GoogleProvider({
+            clientId: process.env.GOOGLE_CLIENT_ID,
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+        }),
+    ],
 
-  pages: {
-    signIn: "/signin"
-  },
+    pages: {
+        signIn: "/signin"
+    },
 
-  callbacks: {
-    async signIn({ user, account, profile }) {
-      // If Google login
-      if (account?.provider === "google") {
-        const dbUser = await getUserByEmail(profile.email);
+    callbacks: {
 
-        // If user NOT in database -> send them to signup with Google prefill
+        // 🔥 THIS IS THE IMPORTANT FIX
+        async signIn({ user, account, profile }) {
+
+            // If Google login
+            if (account?.provider === "google") {
+
+                const dbUser = await getUserByEmail(profile.email);
+
+        // If user NOT in database → send them to signup with Google prefill
         if (!dbUser) {
           return "/signup?social=google";
         }
 
-        // If user exists -> allow login
-        return true;
-      }
+                // ✅ If user exists → allow login
+                return true;
+            }
 
-      // Block unverified credentials users
-      if (account?.provider === "credentials") {
-        if (!user?.verified) {
-          return false;
-        }
-      }
+            return true;
+        },
 
-      return true;
+        async jwt({ token, user, account }) {
+            if (account) {
+                token.provider = account.provider;
+            }
+
+            if (account?.provider === "google") {
+                const dbUser = await getUserByEmail(user?.email || token?.email);
+                if (dbUser) {
+                    token.user = dbUser;
+                }
+            } else if (user) {
+                token.user = user;
+            }
+
+            return token;
+        },
+
+        async session({ session, token }) {
+            session.user = session.user || {};
+            session.user.provider = token.provider;
+            session.user.dbUser = token.user;
+            return session;
+        },
     },
-
-    async jwt({ token, user, account }) {
-      if (account) {
-        token.provider = account.provider;
-      }
-
-      if (account?.provider === "google") {
-        const dbUser = await getUserByEmail(user?.email || token?.email);
-        if (dbUser) {
-          token.user = dbUser;
-        }
-      } else if (user) {
-        token.user = user;
-      }
-
-      return token;
-    },
-
-    async session({ session, token }) {
-      session.user = session.user || {};
-      session.user.provider = token.provider;
-      session.user.dbUser = token.user;
-      return session;
-    },
-  },
 };
 
 const handler = NextAuth(authOptions);
